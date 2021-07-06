@@ -35,9 +35,27 @@ public class WidgetEntity {
         this.value = model.getValue();
     }
 
+    //Constructor for unit tests
+    public WidgetEntity(Long id, WidgetModel model) {
+        this.id = id;
+        this.name = model.getName();
+        this.description = model.getDescription();
+        this.value = model.getValue();
+    }
+
     public WidgetModel toModel() {
         return new WidgetModel(this.id, this.name, this.description, this.value);
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setValue(Long value) {
+        this.value = value;
+    }
 }

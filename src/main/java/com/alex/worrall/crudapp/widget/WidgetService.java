@@ -21,13 +21,24 @@ public class WidgetService {
     public WidgetModel getWidgetById(Long id) throws NotFoundException {
         WidgetEntity widgetEntity = repository.findById(id).orElse(null);
         if (widgetEntity == null){
-            throw new NotFoundException(String.format("Unable to find widget with ID %d", 2));
+            throw new NotFoundException(String.format("Unable to find widget with ID %d", id));
         }
         return widgetEntity.toModel();
     }
 
     public WidgetModel createWidget(WidgetModel widgetModel) {
         WidgetEntity widgetEntity = new WidgetEntity(widgetModel);
+        return repository.save(widgetEntity).toModel();
+    }
+
+    public WidgetModel updateWidget(WidgetModel widgetModel) throws NotFoundException {
+        WidgetEntity widgetEntity = repository.findById(widgetModel.getId()).orElse(null);
+        if (widgetEntity == null){
+            throw new NotFoundException(String.format("Unable to find widget with ID %d", 2));
+        }
+        widgetEntity.setName(widgetModel.getName());
+        widgetEntity.setDescription(widgetModel.getDescription());
+        widgetEntity.setValue(widgetModel.getValue());
         return repository.save(widgetEntity).toModel();
     }
 
