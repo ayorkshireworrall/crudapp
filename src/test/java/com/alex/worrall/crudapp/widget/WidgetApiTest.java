@@ -26,8 +26,10 @@ public class WidgetApiTest {
 
     @Test
     public void testCrudApis() {
-        WidgetModel expected1 = new WidgetModel(1L, "Test", "A test widget", 100L);
-        WidgetModel expected2 = new WidgetModel(2L, "Test2", "A test widget", 100L);
+        //Pre-existing widget created by the data initialiser
+        WidgetModel diWidget = new WidgetModel(1L, "Init Widget", "The first of her name", 1L);
+        WidgetModel expected1 = new WidgetModel(2L, "Test", "A test widget", 100L);
+        WidgetModel expected2 = new WidgetModel(3L, "Test2", "A test widget", 100L);
 
         //CREATE
         //create 1
@@ -50,13 +52,13 @@ public class WidgetApiTest {
 
         //RETRIEVE
         //get single
-        WidgetModel singleWidget = this.restTemplate.getForObject(getUrlStart() + "/1", WidgetModel.class);
+        WidgetModel singleWidget = this.restTemplate.getForObject(getUrlStart() + "/2", WidgetModel.class);
         assertEquals(expected1, singleWidget);
 
         //get all
         List<WidgetModel> allWidgets = Arrays.asList(this.restTemplate.getForObject(getUrlStart() + "/",
                 WidgetModel[].class));
-        List<WidgetModel> expectedWidgets = Arrays.asList(expected1, expected2);
+        List<WidgetModel> expectedWidgets = Arrays.asList(diWidget, expected1, expected2);
         assertEquals(allWidgets, expectedWidgets);
 
         //UPDATE
@@ -67,11 +69,11 @@ public class WidgetApiTest {
         assertEquals(updatedWidget, singleWidget);
 
         //DELETE
-        assertEquals(2, allWidgets.size());
+        assertEquals(3, allWidgets.size());
         this.restTemplate.delete(getUrlStart() + "/1");
         allWidgets = Arrays.asList(this.restTemplate.getForObject(getUrlStart() + "/",
                 WidgetModel[].class));
-        assertEquals(1, allWidgets.size());
+        assertEquals(2, allWidgets.size());
 
     }
 
