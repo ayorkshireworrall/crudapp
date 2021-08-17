@@ -11,4 +11,8 @@ public interface DataInitialiserModule {
     }
 
     public void initialiseData();
+
+    public default int getExecutionOrder() {
+        return 1000;
+    }
 }

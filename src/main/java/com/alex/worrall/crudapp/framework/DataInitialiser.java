@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class DataInitialiser {
@@ -22,7 +23,10 @@ public class DataInitialiser {
 
     @PostConstruct
     public void performInitialisation() {
-        for (DataInitialiserModule dataInitialiser : dataInitialisers) {
+        List<DataInitialiserModule> sortedDIs = dataInitialisers.stream()
+                .sorted((m1, m2) -> m1.getExecutionOrder() - m2.getExecutionOrder())
+                .collect(Collectors.toList());
+        for (DataInitialiserModule dataInitialiser : sortedDIs) {
             if (initTestData || dataInitialiser.runInAllEnvs()) {
                 log.info("Running initialisation for {}", dataInitialiser.getName());
                 dataInitialiser.initialiseData();

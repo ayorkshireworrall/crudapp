@@ -12,4 +12,13 @@ http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibas
             <column name="value" type="BIGINT"/>
         </createTable>
     </changeSet>
+    <changeSet id="2" author="aworrall">
+        <createTable tableName="user">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+            <column name="username" type="varchar(50)"/>
+            <column name="password" type="varchar(50)"/>
+            <column name="enabled" type="boolean"/>
+            <column name="roles" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
