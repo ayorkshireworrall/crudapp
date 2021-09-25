@@ -21,4 +21,11 @@ http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibas
             <column name="roles" type="varchar(255)"/>
         </createTable>
     </changeSet>
+    <changeSet id="3" author="aworrall">
+        <addColumn tableName="user">
+            <column name="auth_provider" type="varchar(20)" />
+            <column name="email" type="varchar(50)"/>
+            <column name="provider_id" type="varchar(20)" />
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

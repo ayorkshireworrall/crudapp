@@ -1,6 +1,7 @@
 package com.alex.worrall.crudapp.user;
 
 import com.alex.worrall.crudapp.framework.Exceptions.UsernameInUseException;
+import com.alex.worrall.crudapp.security.model.AuthProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,9 +28,11 @@ public class UserService implements UserDetailsService {
                 user.getPassword(), user.isEnabled(), true, true, true, user.getAuthorities());
     }
 
-    public void createUser(String username, String password, Role... roles) throws UsernameInUseException {
-        if (checkUsernameAvailable(username)) {
-            User user = new User(username, passwordEncoder.encode(password), roles);
+    public void createEnabledUser(String email, String password, AuthProvider authProvider,
+                                  Role... roles) throws UsernameInUseException {
+        if (checkUsernameAvailable(email)) {
+            User user = new User(email, email, passwordEncoder.encode(password), roles);
+            user.setAuthProvider(authProvider);
             user.setEnabled(true);
             userRepository.save(user);
         }

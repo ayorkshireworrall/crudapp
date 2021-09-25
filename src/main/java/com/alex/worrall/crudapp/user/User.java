@@ -1,11 +1,14 @@
 package com.alex.worrall.crudapp.user;
 
+import com.alex.worrall.crudapp.security.model.AuthProvider;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -26,12 +29,22 @@ public class User implements UserDetails{
         this.roleNames = rolesToString(roles);
     }
 
+    public User(String username, String email, String password, Role... roles) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.roleNames = rolesToString(roles);
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(unique = true)
     private String username;
+
+    @Column(unique = true)
+    private String email;
 
     @JsonIgnore
     @Column
@@ -42,6 +55,13 @@ public class User implements UserDetails{
 
     @Column(name = "roles")
     private String roleNames;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider;
+
+    @Column
+    private String providerId;
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles();
@@ -86,6 +106,21 @@ public class User implements UserDetails{
         this.enabled = enabled;
     }
 
+    public AuthProvider getAuthProvider() {
+        return authProvider;
+    }
+
+    public void setAuthProvider(AuthProvider authProvider) {
+        this.authProvider = authProvider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
+    }
 
     static String rolesToString(Role[] roles) {
         if (roles == null || roles.length == 0) {
