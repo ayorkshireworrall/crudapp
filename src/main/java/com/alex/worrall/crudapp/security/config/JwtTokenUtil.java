@@ -1,5 +1,6 @@
 package com.alex.worrall.crudapp.security.config;
 
+import com.alex.worrall.crudapp.framework.Exceptions.WrongActionClaimException;
 import com.alex.worrall.crudapp.user.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -22,11 +23,14 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenUtil implements Serializable {
 
+    public static final String ACTION_CLAIM = "ACTION";
+    public static final String ACTION_EMAIL_VERIFICATION = "EMAIL_VERIFICATION";
+
     @Value("${jwt.secret}")
     private String secret;
 
     @Value("${jwt.lifetime}")
-    private long lifetime;
+    private long defaultLifetime;
 
     //retrieve username from jwt token
     public String getUsernameFromToken(String token) {
@@ -51,6 +55,23 @@ public class JwtTokenUtil implements Serializable {
         return getClaimFromToken(token, Claims::getExpiration);
     }
 
+    public void assertActionClaimEquals(String expected, String token) {
+        String actionClaimFromToken = getActionClaimFromToken(token);
+        if (!expected.equals(actionClaimFromToken)) {
+            throw new WrongActionClaimException(String.format("Provided token did not contain a " +
+                    "claim for the action %s", expected));
+        }
+    }
+
+    public String getActionClaimFromToken(String token) {
+        return (String) getClaimFromToken(token, ACTION_CLAIM);
+    }
+
+    public Object getClaimFromToken(String token, String claim) {
+        final Claims claims = getAllClaimsFromToken(token);
+        return claims.get(claim);
+    }
+
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
@@ -66,21 +87,29 @@ public class JwtTokenUtil implements Serializable {
         return expiration.before(new Date());
     }
 
-    //generate token for user
     public String generateToken(UserDetails userDetails) {
+        return generateToken(userDetails, defaultLifetime);
+    }
+
+    public String generateToken(Map<String, Object> claims, String subject, Long lifetime) {
+        return doGenerateToken(claims, subject, lifetime);
+    }
+
+    //generate token for user
+    public String generateToken(UserDetails userDetails, Long lifetime) {
         Map<String, Object> claims = new HashMap<>();
         final String authorities = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
         claims.put("AUTHORITIES", authorities);
         claims.put("ROLES", authorities);
-        return doGenerateToken(claims, userDetails.getUsername());
+        return doGenerateToken(claims, userDetails.getUsername(), lifetime);
     }
 
     public String generateToken(Authentication auth) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("ROLES", auth.getAuthorities());
-        return doGenerateToken(claims, ((UserDetails) auth.getPrincipal()).getUsername());
+        return doGenerateToken(claims, ((UserDetails) auth.getPrincipal()).getUsername(), defaultLifetime);
     }
 
     //while creating the token -
@@ -88,7 +117,7 @@ public class JwtTokenUtil implements Serializable {
 //2. Sign the JWT using the HS512 algorithm and secret key.
 //3. According to JWS Compact Serialization(https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-3.1)
 //   compaction of the JWT to a URL-safe string
-    private String doGenerateToken(Map<String, Object> claims, String subject) {
+    private String doGenerateToken(Map<String, Object> claims, String subject, Long lifetime) {
 
         return Jwts.builder()
                 .setClaims(claims)

@@ -42,7 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Autowired
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private AppAuthenticationEntryPoint appAuthenticationEntryPoint;
 
     @Autowired
     private UserService userService;
@@ -61,9 +61,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity.csrf().disable()
                 .authorizeRequests()
                     .antMatchers("/authenticate").permitAll()
-                .antMatchers("/h2-console/**").permitAll()
+                    .antMatchers("/session").permitAll()
+                    .antMatchers("/h2-console/**").permitAll()
+                    .antMatchers("/api/v1/users/registration/**").permitAll()
+                    .antMatchers("/api/v1/users/verify/email").permitAll()
+                    .antMatchers("/api/v1/users/resend/verification/email").permitAll()
                 .anyRequest().authenticated().and()
-                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
+                .httpBasic().and()
+                .exceptionHandling().authenticationEntryPoint(appAuthenticationEntryPoint).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

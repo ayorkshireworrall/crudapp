@@ -1,16 +1,16 @@
 package com.alex.worrall.crudapp.security.model;
 
-public class JwtRequest {
+public class UsernameAndPassword {
     private String username;
     private String password;
 
     //need default constructor for JSON Parsing
-    public JwtRequest()
+    public UsernameAndPassword()
     {
 
     }
 
-    public JwtRequest(String username, String password) {
+    public UsernameAndPassword(String username, String password) {
         this.setUsername(username);
         this.setPassword(password);
     }

@@ -28,4 +28,16 @@ http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibas
             <column name="provider_id" type="varchar(20)" />
         </addColumn>
     </changeSet>
+    <changeSet id="4" author="aworrall">
+        <addColumn tableName="user">
+            <column name="registered_on" type="DATETIME" />
+        </addColumn>
+        <createTable tableName="email">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+            <column name="addressee" type="varchar(254)"/>
+            <column name="created_on" type="DATETIME" />
+            <column name="status" type="varchar(50)" />
+            <column name="subject" type="varchar(100)" />
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
