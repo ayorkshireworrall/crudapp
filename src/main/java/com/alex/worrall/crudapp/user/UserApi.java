@@ -15,9 +15,15 @@ public class UserApi {
     @Autowired
     UserService userService;
 
-    @PostMapping("/registration/app")
-    public void registerUser(@RequestBody UserRegistration userRegistration) {
-        userService.registerUser(userRegistration, AuthProvider.app);
+    @PostMapping("/registration")
+    public void registerAppUser(@RequestBody UserRegistration userRegistration,
+                                @RequestParam String authProvider) {
+        userService.register(userRegistration, AuthProvider.valueOf(authProvider));
+    }
+
+    @PostMapping("/registration/google")
+    public void registerGoogleUser(@RequestBody UserRegistration userRegistration) {
+
     }
 
     @PostMapping("/resend/verification/email")

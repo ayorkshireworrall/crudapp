@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 import static com.alex.worrall.crudapp.security.config.JwtTokenUtil.ACTION_EMAIL_VERIFICATION;
+import static com.alex.worrall.crudapp.security.model.AuthProvider.app;
 
 @Component
 public class UserService implements UserDetailsService {
@@ -54,19 +55,49 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public void registerUser(UserRegistration userRegistration,  AuthProvider authProvider) throws InUseException {
+    public void register(UserRegistration userRegistration, AuthProvider authProvider) {
+        if (app.equals(authProvider)) {
+            registerAppUser(userRegistration);
+        } else {
+            registerSocialUser(userRegistration, authProvider);
+        }
+    }
+
+    protected void registerAppUser(UserRegistration userRegistration) throws InUseException {
         String email = userRegistration.getEmail();
         String username = userRegistration.getUsername() == null ? email : userRegistration.getUsername();
         checkUsernameAndEmail(username, email);
         Role[] roles = {Role.USER};
         User user = new User(username, email, passwordEncoder.encode(userRegistration.getPassword()), roles);
-        user.setAuthProvider(authProvider);
+        user.setAuthProvider(app);
         user.setRegisteredOn(new Date(System.currentTimeMillis()));
-        user.setEnabled(!authProvider.equals(AuthProvider.app)); // social logins need no confirmation
+        user.setEnabled(false);
         userRepository.save(user);
-        if (authProvider.equals(AuthProvider.app)) {
-            emailService.createVerificationEmail(username, email);
-        }
+        emailService.createVerificationEmail(username, email);
+    }
+
+    protected void registerSocialUser(UserRegistration userRegistration, AuthProvider authProvider) {
+        String email = userRegistration.getEmail();
+        String username = userRegistration.getUsername() == null ? email : userRegistration.getUsername();
+        checkUsernameAndEmail(username, email);
+        Role[] roles = {Role.USER};
+        User user = new User(username, email, null, roles);
+        user.setAuthProvider(AuthProvider.google);
+        user.setRegisteredOn(new Date(System.currentTimeMillis()));
+        user.setEnabled(true);
+        userRepository.save(user);
+    }
+
+    protected void registerGoogleUser(UserRegistration userRegistration) throws InUseException {
+        String email = userRegistration.getEmail();
+        String username = userRegistration.getUsername() == null ? email : userRegistration.getUsername();
+        checkUsernameAndEmail(username, email);
+        Role[] roles = {Role.USER};
+        User user = new User(username, email, null, roles);
+        user.setAuthProvider(AuthProvider.google);
+        user.setRegisteredOn(new Date(System.currentTimeMillis()));
+        user.setEnabled(true);
+        userRepository.save(user);
     }
 
     public void verifyUserRegistration(String email, String token) {
@@ -105,5 +136,9 @@ public class UserService implements UserDetailsService {
         if (userRepository.findByEmail(email) != null) {
             throw new EmailInUseException(String.format("Email %s is already in use", email));
         }
+    }
+
+    public void save(User user) {
+        userRepository.save(user);
     }
 }
