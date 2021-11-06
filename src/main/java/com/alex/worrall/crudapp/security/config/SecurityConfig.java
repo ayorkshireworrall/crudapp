@@ -96,7 +96,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                                                         Authentication authentication) throws IOException, ServletException {
                         AppOidcUser oAuth2User = (AppOidcUser) authentication.getPrincipal();
 
-                        userService.register(new UserRegistration(oAuth2User.getEmail()), AuthProvider.google);
+                        userService.postSocialAuthentication(oAuth2User);
                     }
                 }).and()
                 .exceptionHandling().authenticationEntryPoint(appAuthenticationEntryPoint).and()

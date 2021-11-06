@@ -6,6 +6,7 @@ import com.alex.worrall.crudapp.framework.Exceptions.InUseException;
 import com.alex.worrall.crudapp.framework.Exceptions.InvalidTokenException;
 import com.alex.worrall.crudapp.framework.Exceptions.UserNotFoundException;
 import com.alex.worrall.crudapp.framework.Exceptions.UsernameInUseException;
+import com.alex.worrall.crudapp.security.config.AppOidcUser;
 import com.alex.worrall.crudapp.security.config.JwtTokenUtil;
 import com.alex.worrall.crudapp.security.model.AuthProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -53,6 +56,18 @@ public class UserService implements UserDetailsService {
         user.setRegisteredOn(new Date(System.currentTimeMillis()));
         user.setEnabled(true);
         userRepository.save(user);
+    }
+
+    public void postSocialAuthentication(OAuth2User user) {
+        if (user instanceof OidcUser) {
+            AppOidcUser oidcUser = (AppOidcUser) user;
+            User existingUser = userRepository.findByEmail(oidcUser.getEmail());
+            if (existingUser == null) {
+                register(new UserRegistration(oidcUser.getEmail()), oidcUser.getProvider());
+            } else {
+                // TODO log user in
+            }
+        }
     }
 
     public void register(UserRegistration userRegistration, AuthProvider authProvider) {

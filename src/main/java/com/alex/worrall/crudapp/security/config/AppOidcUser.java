@@ -1,5 +1,6 @@
 package com.alex.worrall.crudapp.security.config;
 
+import com.alex.worrall.crudapp.security.model.AuthProvider;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
@@ -13,8 +14,15 @@ public class AppOidcUser implements OidcUser {
 
     private OAuth2User oAuth2User;
 
+    private AuthProvider provider;
+
     public AppOidcUser(OAuth2User oAuth2User) {
         this.oAuth2User = oAuth2User;
+    }
+
+    public AppOidcUser(OAuth2User oAuth2User, String provider) {
+        this.oAuth2User = oAuth2User;
+        this.provider = AuthProvider.valueOf(provider);
     }
 
     @Override
@@ -49,5 +57,13 @@ public class AppOidcUser implements OidcUser {
 
     public String getEmail() {
         return oAuth2User.<String>getAttribute("email");
+    }
+
+    public AuthProvider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(AuthProvider provider) {
+        this.provider = provider;
     }
 }

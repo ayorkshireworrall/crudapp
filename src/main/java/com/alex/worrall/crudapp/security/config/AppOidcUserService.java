@@ -13,6 +13,6 @@ public class AppOidcUserService extends OidcUserService {
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User user = super.loadUser(userRequest);
-        return new AppOidcUser(user);
+        return new AppOidcUser(user, userRequest.getClientRegistration().getRegistrationId());
     }
 }
